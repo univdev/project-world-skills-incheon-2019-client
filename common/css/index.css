@@ -123,6 +123,9 @@
 .introduce .introduce__main-text span {
     color: #e98c1f;
 }
+.introduce .introduce__description {
+    line-height: 1.6em;
+}
 .introduce .introduce__frame-small {
     width: 132px;
     height: 95px;
@@ -183,4 +186,27 @@
     height: 48px;
     margin: auto;
     margin-top: 16px;
+}
+
+.tooltip {
+    border-radius: 4px;
+    border: 2px solid #EEE;
+    background-color: white;
+    padding: 8px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+.tooltip .tooltip__image {
+    width: 240px;
+    height: 200px;
+    margin-bottom: 16px;
+}
+.tooltip .tooltip__title {
+    font-weight: bold;
+    font-size: 18px;
+}
+.tooltip .tooltip__score {
+    color: #e18e2c;
+    font-size: 18px;
 }

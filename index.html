@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scaleable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Bexco</title>
     <link rel="stylesheet" href="/common/css/common.css">
@@ -31,6 +31,8 @@
         </div>
         <div class="animation">
             <div class="animation__movement">
+                <div class="animation__slide-child"></div>
+                <div class="animation__slide-child"></div>
                 <div class="animation__slide-child"></div>
             </div>
             <div class="animation__canvas">
@@ -248,5 +250,106 @@
             </div>
         </div>
     </div>
+    <div class="tooltip">
+        <div class="tooltip__image photo-frame"></div>
+        <div class="tooltip__title">행사장 이름</div>
+        <div class="tooltip__score">★★★★☆</div>
+    </div>
+    <script
+    src="https://code.jquery.com/jquery-3.4.1.js"
+    integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+    <script>
+        function on(event, target, callback) {
+            $(document).on(event, target, callback);
+        }
+
+        (() => {
+            var Slide = {
+                position: 0,
+                interval: null,
+                target: '.animation__movement',
+                duration: 2000,
+                clock: 5000,
+                button: '.animation__page-button',
+                move(n) {
+                    this.clear();
+                    var index = this.filter(n);
+                    var position = -100 * index;
+
+                    this.activeButton(index);
+                    
+                    $(this.target).animate({
+                        left: position,
+                    }, this.duration, () => {
+                        this.interval = setTimeout(() => { this.move(index + 1) }, this.clock);
+                    });
+
+                    this.position = index + 1;
+                },
+                filter(n) {
+                    var children = $(this.target).find('.animation__slide-child');
+
+                    return n >= children.length ? 0 : n < 0 ? children.length - 1 : n;
+                },
+                clear() {
+                    clearTimeout(this.interval);
+                    $(this.target).clearQueue().stop();
+                },
+                activeButton(index) {
+                    $(this.button).removeClass('--active');
+                    $($(this.button)[index]).addClass('--active');
+                },
+                next() {
+                    this.move(this.position - 1);
+                },
+                prev() {
+                    this.move(this.position - 1);
+                },
+            };
+
+            Slide.move(0);
+
+            on('click', Slide.button, (e) => {
+                var index = $(e.target).index();
+                Slide.move(index);
+            });
+        })();
+    </script>
+    <script>
+        (() => {
+
+            var Tooltip = {
+                target: '.tooltip',
+                init() {
+                    $(this.target).hide();
+                },
+                move(x, y) {
+                    this.toggle(true);
+                    $(this.target).css({
+                        'left': x,
+                        'top': y,
+                    });
+                },
+                toggle(flag) {
+                    var target = $(this.target);
+
+                    if (flag) target.show();
+                    else target.hide();
+                },
+            };
+
+            Tooltip.init();
+
+            on('mouseenter', '.festival__frame', () => { Tooltip.toggle(true); })
+            on('mousemove', '.festival__frame', (e) => {
+                var x = e.pageX + 5;
+                var y = e.pageY + 5;
+
+                Tooltip.move(x, y);
+            });
+            on('mouseleave', '.festival__frame', () => { Tooltip.toggle(false); console.log(1); })
+        })();
+    </script>
 </body>
 </html>

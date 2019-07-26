@@ -3,6 +3,7 @@
     margin: 0;
     box-sizing: border-box;
     outline: none;
+    letter-spacing: -0.04em;
 }
 ul {
     list-style-type: none;
