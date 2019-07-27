@@ -40,3 +40,23 @@
 .content {
     padding: 16px 0;
 }
+
+.placements {
+    width: 100%;
+    border-collapse: collapse;
+}
+.placements th, .placements td {
+    border: 1px solid #EEE;
+    padding: 4px 0;
+    text-align: center;
+}
+.placements tr:hover {
+    background-color: #EEE;
+    cursor: pointer;
+}
+.placements .placement__frame {
+    width: 100%;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+}

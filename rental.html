@@ -40,8 +40,32 @@
         </div>
         <div class="content">
             <div class="container">
-                <table>
+                <table class="placements">
+                    <thead>
+                        <tr>
+                            <th style="width: 140px">행사장 사진</th>
+                            <th style="width: 200px">행사장 이름</th>
+                            <th>행사장 소개</th>
+                            <th style="width: 200px">휴무일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="placement">
+                            <td>
+                                <div class="placement__frame"></div>
+                            </td>
+                            <td class="placement__title">
 
+                            </td>
+                            <td>
+                               <div class="placement__description"></div> 
+                               <div class="placement__score"></div>
+                            </td>
+                            <td class="placement__rest">
+
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -59,7 +83,47 @@
             return $.get('/data/placement.json');
         }).then((data) => {
             placements = data.places;
+            PlacementTable.draw(placements);
         });
+
+        var PlacementTable = {
+            table: '.placements',
+            thead: '.placements thead',
+            tbody: '.placements tbody',
+            row: $('.placements tbody tr').get(0),
+            draw(placements) {
+                this.clear();
+                for (var i = 0; i < placements.length; i += 1) {
+                    var placement = placements[i];
+                    var clone = $(this.row).clone();
+
+                    var name = placement.name;
+                    var score = placement.score;
+                    var description = placement.description;
+                    var price = placement.price;
+                    var rest = placement.rest;
+                    var image = placement.image;
+                    var restKor = [];
+                    rest.forEach((index) => { restKor.push(RestFilter.get(index)); });
+
+                    clone.find('.placement__frame').css('background-image', `url(${`images/${image}`})`);
+                    clone.find('.placement__title').text(name);
+                    clone.find('.placement__description').text(description);
+                    clone.find('.placement__rest').text(restKor.join(', '));
+                    $(this.tbody).append(clone);
+                }
+            },
+            clear() {
+                $(this.tbody).html('');
+            },
+        };
+
+        var RestFilter = {
+            data: ['일', '월', '화', '수', '목', '금', '토'],
+            get(index) {
+                return this.data[index] || null;
+            },
+        };
     </script>
 </body>
 </html>
