@@ -7,6 +7,9 @@
     <title>Bexco</title>
     <link rel="stylesheet" href="/common/css/common.css">
     <link rel="stylesheet" href="/common/css/index.css">
+    <meta property="og:title" content="Bexco">
+    <meta property="og:description" content="Bexco">
+    <meta property="og:image" content="images/01.jpg">
 </head>
 <body>
     <div id="wrap">
@@ -56,7 +59,7 @@
         <div class="introduce">
             <div class="container">
                 <div class="grid-row">
-                    <div class="col-lg-6">
+                    <div class="col-lg-6 col-md-12">
                         <div class="introduce__text">
                             <div class="introduce__sub-text">세계인이 설레는 그 이름</div>
                             <strong class="introduce__main-text">
@@ -68,9 +71,16 @@
                                 있는 축제의 명소로 거듭나기 위해 최선을 다할것을 약속합니다. 우리는 앞으로도
                                 전세계인들의 즐거운 추억속에 기억되기를 간절히 희망합니다. 
                             </div>
+                            <div class="introduce__frame-row">
+                                <!-- <img src="assets/introduce_arrow_left.png" alt="" class="introduce__arrow-left"> -->
+                                <div class="introduce__frame-small photo-frame"></div>
+                                <div class="introduce__frame-small photo-frame"></div>
+                                <div class="introduce__frame-small photo-frame"></div>
+                                <!-- <img src="assets/introduce_arrow_right.png" alt="" class="introduce__arrow-right"> -->
+                            </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-lg-6 col-md-12">
                         <div class="photo-frame introduce__frame-big"></div>
                     </div>
                 </div>
@@ -354,7 +364,32 @@
 
                 Tooltip.move(x, y);
             });
-            on('mouseleave', '.festival__frame', () => { Tooltip.toggle(false); console.log(1); })
+            on('mouseleave', '.festival__frame', () => { Tooltip.toggle(false);})
+        })();
+    </script>
+    <script>
+        (() => {
+
+            var Introduce = {
+                target: '.introduce__frame-big',
+                selector: '.introduce__frame-small',
+                change(n) {
+                    $(this.target).css('background-image', this.items(n));
+                },
+                items(n) {
+                    var children = $(this.selector);
+                    var index = children.length <= n ? 0 : n < 0 ? children.length - 1 : n;
+                    return $(children[index]).css('background-image')
+                },
+            };
+
+            Introduce.change(0);
+
+            on('click', Introduce.selector, (e) => {
+                var index = $(e.currentTarget).index();
+                console.log(index, e);
+                Introduce.change(index)
+            });
         })();
     </script>
 </body>

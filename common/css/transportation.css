@@ -23,6 +23,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background-image: url(../../images/04.jpg);
+    background-size: cover;
+    background-position: bottom;
+    color: white;
+    text-shadow: 0 0 5px rgba(0, 0, 0, .4);
 }
 .title-section .title-section__text {
     text-align: center;

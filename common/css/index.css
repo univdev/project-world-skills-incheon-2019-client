@@ -65,10 +65,10 @@
     background-position: center;
 }
 .animation .animation__slide-child:nth-of-type(1) {
-    background-image: url(../../images/01.jpg);
+    background-image: url(../../images/07.jpg);
 }
 .animation .animation__slide-child:nth-of-type(2) {
-    background-image: url(../../images/02.jpg);
+    background-image: url(../../images/04.jpg);
 }
 .animation .animation__slide-child:nth-of-type(3) {
     background-image: url(../../images/03.jpg);
@@ -141,12 +141,28 @@
 .introduce .introduce__description {
     line-height: 1.6em;
 }
+.introduce .introduce__frame-big {
+    height: 420px;
+}
+.introduce .introduce__frame-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 48px;
+}
 .introduce .introduce__frame-small {
     width: 132px;
     height: 95px;
+    cursor: pointer;
 }
-.introduce .introduce__frame-big {
-    height: 420px;
+.introduce .introduce__frame-small:nth-of-type(1) {
+    background-image: url(../../images/01.jpg);
+}
+.introduce .introduce__frame-small:nth-of-type(2) {
+    background-image: url(../../images/02.jpg);
+}
+.introduce .introduce__frame-small:nth-of-type(3) {
+    background-image: url(../../images/03.jpg);
 }
 
 .festival {

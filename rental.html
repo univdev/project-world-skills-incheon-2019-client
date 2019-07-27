@@ -7,6 +7,9 @@
     <title>Bexco - 행사장 임대</title>
     <link rel="stylesheet" href="common/css/common.css">
     <link rel="stylesheet" href="common/css/rental.css">
+    <meta property="og:title" content="Bexco - 행사장 임대">
+    <meta property="og:description" content="Bexco 행사장을 임대할 수 있는 페이지입니다.">
+    <meta property="og:image" content="images/01.jpg">
 </head>
 <body>
     <div id="wrap">
@@ -37,9 +40,26 @@
         </div>
         <div class="content">
             <div class="container">
-                
+                <table>
+
+                </table>
             </div>
         </div>
     </div>
+    <script
+    src="https://code.jquery.com/jquery-3.4.1.js"
+    integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+    <script>
+        var reservations = [];
+        var placements = [];
+
+        $.get('/data/reservation.json').then((data) => {
+            reservations = data.reservations;
+            return $.get('/data/placement.json');
+        }).then((data) => {
+            placements = data.places;
+        });
+    </script>
 </body>
 </html>
