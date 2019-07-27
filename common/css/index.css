@@ -61,6 +61,17 @@
     flex: 1;
     background-color: #EEE;
     height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+.animation .animation__slide-child:nth-of-type(1) {
+    background-image: url(../../images/01.jpg);
+}
+.animation .animation__slide-child:nth-of-type(2) {
+    background-image: url(../../images/02.jpg);
+}
+.animation .animation__slide-child:nth-of-type(3) {
+    background-image: url(../../images/03.jpg);
 }
 .animation .animation__canvas {
     position: relative;
@@ -104,6 +115,10 @@
 .animation .animation__page-button.--active {
     background-color: #f49423;
     cursor: default;
+}
+.animation .animation__slide-arrow {
+    cursor: pointer;
+    margin-right: 16px;
 }
 
 .introduce {
@@ -196,6 +211,7 @@
     position: absolute;
     left: 0;
     top: 0;
+    display: none;
 }
 .tooltip .tooltip__image {
     width: 240px;

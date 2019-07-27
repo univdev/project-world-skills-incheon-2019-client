@@ -46,6 +46,8 @@
                         <button class="animation__page-button --active">01</button>
                         <button class="animation__page-button">02</button>
                         <button class="animation__page-button">03</button>
+                        <img src="assets/animation_arrow_left.png" alt="" class="animation__slide-arrow animation__slide-arrow-left">
+                        <img src="assets/animation_arrow_right.png" alt="" class="animation__slide-arrow animation__slide-arrow-right">
                     </div>
                 </div>
                 <div class="cloud"></div>
@@ -272,6 +274,8 @@
                 duration: 2000,
                 clock: 5000,
                 button: '.animation__page-button',
+                prevButton: '.animation__slide-arrow-left',
+                nextButton: '.animation__slide-arrow-right',
                 move(n) {
                     this.clear();
                     var index = this.filter(n);
@@ -280,12 +284,12 @@
                     this.activeButton(index);
                     
                     $(this.target).animate({
-                        left: position,
+                        left: `${position}%`,
                     }, this.duration, () => {
                         this.interval = setTimeout(() => { this.move(index + 1) }, this.clock);
                     });
 
-                    this.position = index + 1;
+                    this.position = index;
                 },
                 filter(n) {
                     var children = $(this.target).find('.animation__slide-child');
@@ -301,7 +305,7 @@
                     $($(this.button)[index]).addClass('--active');
                 },
                 next() {
-                    this.move(this.position - 1);
+                    this.move(this.position + 1);
                 },
                 prev() {
                     this.move(this.position - 1);
@@ -314,6 +318,8 @@
                 var index = $(e.target).index();
                 Slide.move(index);
             });
+            on('click', Slide.prevButton, () => { Slide.prev() });
+            on('click', Slide.nextButton, () => { Slide.next() });
         })();
     </script>
     <script>
