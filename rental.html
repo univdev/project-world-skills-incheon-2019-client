@@ -47,6 +47,7 @@
                             <th style="width: 140px">행사장 사진</th>
                             <th style="width: 200px">행사장 이름</th>
                             <th>행사장 소개</th>
+                            <th style="width: 200px">임대료</th>
                             <th style="width: 200px">휴무일</th>
                         </tr>
                     </thead>
@@ -59,8 +60,16 @@
 
                             </td>
                             <td>
-                               <div class="placement__description"></div> 
-                               <div class="placement__score"></div>
+                                <div class="placement__info-row">
+                                    <div class="placement__info-title">설명</div>
+                                    <div class="placement__description"></div> 
+                                </div>
+                                <div class="placement__info-row">
+                                    <div class="placement__score"></div> 
+                                </div>
+                            </td>
+                            <td class="placement__price">
+
                             </td>
                             <td class="placement__rest">
 
@@ -70,8 +79,36 @@
                 </table>
             </div>
         </div>
+        <div class="footer">
+                <div class="container">
+                    <div class="footer__upper">
+                        <ul class="footer__menu">
+                            <li>CONTACT US</li>
+                            <li>SOCIAL</li>
+                            <li>STAGES</li>
+                            <li>WORLD</li>
+                        </ul>
+                        <div class="footer__copyright">
+                            COPYRIGHT ⓒ ALL RIGHT RESERVED.
+                        </div>
+                    </div>
+                    <div class="footer__downer">
+                        <div class="footer__description">
+                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Facere quidem nulla sapiente culpa eveniet et<br>
+                            minima numquam veniam? Dolores molestias consectetur voluptatibus ratione in possimus,
+                        </div>
+                        <img src="assets/grayscale_logo.png" alt="Bexco" class="footer__logo">
+                    </div>
+                </div>
+            </div>
     </div>
-    <div class="reservation-dialog">asd</div>
+    <div class="reservation-dialog">
+        <h2 class="reservation__name">행사장 이름</h2>
+        <div class="reservation__datepicker-row">
+            <input type="text" class="start-datepicker reservation__datepicker" placeholder="시작일"> ~ 
+            <input type="text" class="end-datepicker reservation__datepicker" placeholder="종료일">
+        </div>
+    </div>
     <script
     src="https://code.jquery.com/jquery-3.4.1.js"
     integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
@@ -87,16 +124,20 @@
 
         var reservations = [];
         var placements = [];
+        var currentPlacement = {};
+        var currentPlacementReservations = [];
+
+        $(document).tooltip();
 
         $.get('/data/reservation.json').then((data) => {
             reservations = data.reservations;
             return $.get('/data/placement.json');
         }).then((data) => {
             placements = data.places;
-            PlacementTable.draw(placements);
+            PlacementTableManager.draw(placements);
         });
 
-        var PlacementTable = {
+        var PlacementTableManager = {
             table: '.placements',
             thead: '.placements thead',
             tbody: '.placements tbody',
@@ -107,6 +148,7 @@
                     var placement = placements[i];
                     var clone = $(this.row).clone();
 
+                    var id = placement.id;
                     var name = placement.name;
                     var score = placement.score;
                     var description = placement.description;
@@ -116,9 +158,12 @@
                     var restKor = [];
                     rest.forEach((index) => { restKor.push(RestFilter.get(index)); });
 
+                    clone.attr('data-idx', id);
                     clone.find('.placement__frame').css('background-image', `url(${`images/${image}`})`);
                     clone.find('.placement__title').text(name);
                     clone.find('.placement__description').text(description);
+                    clone.find('.placement__price').text(`${price}원`);
+                    clone.find('.placement__score').text(`${score}점`);
                     clone.find('.placement__rest').text(restKor.join(', '));
                     $(this.tbody).append(clone);
                 }
@@ -135,19 +180,104 @@
             },
         };
 
-        var ReservationDialog = {
-            target: $('.reservation-dialog').dialog(),
+        var ReservationDialogManager = {
+            target: $('.reservation-dialog'),
             init() {
+                this.target.dialog({
+                    title: '예약',
+                    modal: true,
+                    width: 500,
+                    height: 150,
+                });
                 this.target.dialog('close');
             },
             visible(flag) {
                 flag ? this.target.dialog('open') : this.target.dialog('close');
             },
+            setTitle(title) {
+                this.target.find('.reservation__name').text(title);
+            },
         };
-        ReservationDialog.init();
+        ReservationDialogManager.init();
 
-        on('click', `${PlacementTable.tbody} tr`, () => {
-            ReservationDialog.visible(true);
+        var DatepickerManager = {
+            startTarget: $('.start-datepicker'),
+            endTarget: $('.end-datepicker'),
+            init() {
+                this.startTarget.datepicker().on('change', (date) => {
+                    this.setEndDatepickerLimit(this.startTarget.val());
+                });
+                this.endTarget.datepicker().on('change', (date) => {
+                    this.setStartDatepickerLimit(this.endTarget.val());
+                });
+            },
+            setStartDatepickerLimit(date) {
+                this.startTarget.datepicker('option', 'maxDate', date);
+            },
+            setEndDatepickerLimit(date) {
+                this.endTarget.datepicker('option', 'minDate', date);
+            },
+            setRest(reservations) {
+                var callback = (date) => {
+                    var flag = true;
+                    var className = '';
+
+                    for (let i = 0; i < reservations.length; i += 1) {
+                        var since = new Date(reservations[i].since);
+                        var until = new Date(reservations[i].until);
+                        since.setHours(0, 0, 0, 0); // 기존 9시로 설정된 날짜를 0시로 변경
+                        until.setHours(0, 0, 0, 0); // 기존 9시로 설정된 날짜를 0시로 변경
+
+                        if (date.getTime() >= since.getTime() && date.getTime() <= until.getTime()) {
+                            className = `--already-${reservations[i].id}`;
+                            flag = false;
+                            break;
+                        }
+                    }
+                    return [flag, className];
+                };
+
+                this.startTarget.datepicker('option', 'beforeShowDay', callback);
+                this.endTarget.datepicker('option', 'beforeShowDay', callback);
+            },
+        };
+        DatepickerManager.init();
+
+        var ReservationDataManager = {
+            get(index) {
+                return reservations[index] || null;
+            },
+            getByPlacement(placement) {
+                var result = [];
+                for (let i = 0; i < reservations.length; i += 1) {
+                    if (reservations[i].placement === placement) result.push(reservations[i]);
+                }
+                return result;
+            },
+        };
+
+        var PlacementDataManager = {
+            get(index) {
+                return placements[index];
+            },
+            getById(index) {
+                var result = null;
+                for (let i = 0; i < placements.length; i += 1) {
+                    if (placements[i].id === index) {
+                        result = placements[i];
+                        break;
+                    }
+                }
+                return result;
+            },
+        };
+
+        on('click', `${PlacementTableManager.tbody} tr`, (e) => {
+            var target = $(e.currentTarget);
+            currentPlacement = PlacementDataManager.getById(target.data('idx'));
+            currentPlacementReservations = ReservationDataManager.getByPlacement(currentPlacement.id);
+            ReservationDialogManager.visible(true);
+            DatepickerManager.setRest(currentPlacementReservations);
         });
     </script>
 </body>

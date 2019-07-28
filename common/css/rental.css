@@ -48,7 +48,6 @@
 .placements th, .placements td {
     border: 1px solid #EEE;
     padding: 4px 0;
-    text-align: center;
 }
 .placements tbody tr:hover {
     background-color: #EEE;
@@ -59,4 +58,74 @@
     height: 100px;
     background-size: cover;
     background-position: center;
+}
+.placements .placement__info-row {
+    margin-bottom: 8px;
+    padding: 0 16px;
+}
+.placements .placement__info-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.reservation-dialog .reservation__name {
+    margin-bottom: 8px;
+}
+.reservation-dialog .reservation__datepicker-row {
+    display: flex;
+    align-items: center;
+}
+.reservation-dialog .reservation__datepicker {
+    border: 1px solid #CCC;
+    background-color: white;
+    padding: 6px;
+    border-radius: 4px;
+    flex: 1;
+    margin: 0 8px;
+}
+.reservation-dialog .reservation__datepicker:first-of-type {
+    margin-left: 0;
+}
+.reservation-dialog .reservation__datepicker:last-of-type {
+    margin-right: 0;
+}
+
+.footer {
+    width: 100%;
+    background-color: white;
+    padding: 50px 0;
+}
+.footer .container {
+    display: flex;
+    flex-direction: column;
+}
+.footer .footer__upper,
+.footer .footer__downer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.footer .footer__upper {
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #CCC;
+}
+.footer .footer__menu {
+    display: flex;
+    align-items: center;
+}
+.footer .footer__menu li {
+    padding: 0 16px;
+    border-right: 1px solid #CCC;
+}
+.footer .footer__menu li:first-of-type {
+    padding-left: 0;
+}
+.footer .footer__menu li:last-of-type {
+    padding-right: 0;
+    border-right: none;
+}
+.footer .footer__description {
+    color: #cccccc;
 }
