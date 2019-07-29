@@ -212,10 +212,14 @@
                 });
             },
             setStartDatepickerLimit(date) {
+                var recentlyReservationDate = ReservationDataManager.getRecentlyUntil(date);
+                this.startTarget.datepicker('option', 'minDate', recentlyReservationDate);
                 this.startTarget.datepicker('option', 'maxDate', date);
             },
             setEndDatepickerLimit(date) {
+                var recentlyReservationDate = ReservationDataManager.getRecentlySince(date);
                 this.endTarget.datepicker('option', 'minDate', date);
+                this.endTarget.datepicker('option', 'maxDate', recentlyReservationDate);
             },
             setRest(reservations) {
                 var callback = (date) => {
@@ -253,6 +257,28 @@
                     if (reservations[i].placement === placement) result.push(reservations[i]);
                 }
                 return result;
+            },
+            getRecentlySince(date) {
+                var standard = new Date(date);
+                var result = Infinity;
+                standard.setHours(0, 0, 0, 0);
+                for (var i = 0; i < currentPlacementReservations.length; i += 1) {
+                    var reservation = currentPlacementReservations[i];
+                    var since = new Date(reservation.since);
+                    if (since > standard && since < result) result = since;
+                }
+                return result || standard;
+            },
+            getRecentlyUntil(date) {
+                var standard = new Date(date);
+                var result = 0;
+                standard.setHours(0, 0, 0, 0);
+                for (var i = 0; i < currentPlacementReservations.length; i += 1) {
+                    var reservation = currentPlacementReservations[i];
+                    var until = new Date(reservation.until);
+                    if (until < standard && until > result) result = until;
+                }
+                return result || standard;
             },
         };
 
