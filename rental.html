@@ -80,27 +80,27 @@
             </div>
         </div>
         <div class="footer">
-                <div class="container">
-                    <div class="footer__upper">
-                        <ul class="footer__menu">
-                            <li>CONTACT US</li>
-                            <li>SOCIAL</li>
-                            <li>STAGES</li>
-                            <li>WORLD</li>
-                        </ul>
-                        <div class="footer__copyright">
-                            COPYRIGHT ⓒ ALL RIGHT RESERVED.
-                        </div>
-                    </div>
-                    <div class="footer__downer">
-                        <div class="footer__description">
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Facere quidem nulla sapiente culpa eveniet et<br>
-                            minima numquam veniam? Dolores molestias consectetur voluptatibus ratione in possimus,
-                        </div>
-                        <img src="assets/grayscale_logo.png" alt="Bexco" class="footer__logo">
+            <div class="container">
+                <div class="footer__upper">
+                    <ul class="footer__menu">
+                        <li>CONTACT US</li>
+                        <li>SOCIAL</li>
+                        <li>STAGES</li>
+                        <li>WORLD</li>
+                    </ul>
+                    <div class="footer__copyright">
+                        COPYRIGHT ⓒ ALL RIGHT RESERVED.
                     </div>
                 </div>
+                <div class="footer__downer">
+                    <div class="footer__description">
+                        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Facere quidem nulla sapiente culpa eveniet et<br>
+                        minima numquam veniam? Dolores molestias consectetur voluptatibus ratione in possimus,
+                    </div>
+                    <img src="assets/grayscale_logo.png" alt="Bexco" class="footer__logo">
+                </div>
             </div>
+        </div>
     </div>
     <div class="reservation-dialog">
         <h2 class="reservation__name">행사장 이름</h2>
@@ -210,6 +210,12 @@
                 this.endTarget.datepicker().on('change', (date) => {
                     this.setStartDatepickerLimit(this.endTarget.val());
                 });
+                this.startTarget.datepicker('setDate', null);
+                this.endTarget.datepicker('setDate', null);
+                this.startTarget.datepicker('option', 'minDate', new Date());
+                this.startTarget.datepicker('option', 'maxDate', null);
+                this.endTarget.datepicker('option', 'minDate', new Date());
+                this.endTarget.datepicker('option', 'maxDate', null);
             },
             setStartDatepickerLimit(date) {
                 var recentlyReservationDate = ReservationDataManager.getRecentlyUntil(date);
@@ -271,7 +277,7 @@
             },
             getRecentlyUntil(date) {
                 var standard = new Date(date);
-                var result = 0;
+                var result = -Infinity;
                 standard.setHours(0, 0, 0, 0);
                 for (var i = 0; i < currentPlacementReservations.length; i += 1) {
                     var reservation = currentPlacementReservations[i];
@@ -303,7 +309,9 @@
             currentPlacement = PlacementDataManager.getById(target.data('idx'));
             currentPlacementReservations = ReservationDataManager.getByPlacement(currentPlacement.id);
             ReservationDialogManager.visible(true);
+            ReservationDialogManager.setTitle(currentPlacementReservations.name);
             DatepickerManager.setRest(currentPlacementReservations);
+            DatepickerManager.init();
         });
     </script>
 </body>
