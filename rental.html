@@ -188,6 +188,9 @@
                     modal: true,
                     width: 500,
                     height: 150,
+                    open() {
+                        $('input').blur();
+                    },
                 });
                 this.target.dialog('close');
             },
@@ -204,10 +207,10 @@
             startTarget: $('.start-datepicker'),
             endTarget: $('.end-datepicker'),
             init() {
-                this.startTarget.datepicker().on('change', (date) => {
+                this.startTarget.datepicker({ dateFormat: 'yy-mm-dd' }).on('change', (date) => {
                     this.setEndDatepickerLimit(this.startTarget.val());
                 });
-                this.endTarget.datepicker().on('change', (date) => {
+                this.endTarget.datepicker({ dateFormat: 'yy-mm-dd' }).on('change', (date) => {
                     this.setStartDatepickerLimit(this.endTarget.val());
                 });
                 this.startTarget.datepicker('setDate', null);
@@ -229,8 +232,9 @@
             },
             setRest(reservations) {
                 var callback = (date) => {
+                    var rest = currentPlacement.rest;
                     var flag = true;
-                    var className = '';
+                    var day = date.getDay();
 
                     for (let i = 0; i < reservations.length; i += 1) {
                         var since = new Date(reservations[i].since);
@@ -238,13 +242,17 @@
                         since.setHours(0, 0, 0, 0); // 기존 9시로 설정된 날짜를 0시로 변경
                         until.setHours(0, 0, 0, 0); // 기존 9시로 설정된 날짜를 0시로 변경
 
-                        if (date.getTime() >= since.getTime() && date.getTime() <= until.getTime()) {
-                            className = `--already-${reservations[i].id}`;
+                        if (rest.indexOf(day) > -1) {
+                            flag = false;
+                            break;
+                        }
+
+                        if (date.getTime() >= since.getTime() && date.getTime() <= until.getTime() && flag) {
                             flag = false;
                             break;
                         }
                     }
-                    return [flag, className];
+                    return [flag];
                 };
 
                 this.startTarget.datepicker('option', 'beforeShowDay', callback);

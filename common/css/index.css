@@ -194,8 +194,15 @@
 .festival .festival__date {
     font-size: 14px;
 }
-.festival .festival__score {
+.festival .festival__created-at {
     color: #e18e2c;
+    font-weight: bold;
+    font-size: 14px;
+}
+.festival .no-festival {
+    width: 100%;
+    text-align: center;
+    color: #a1a1a1;
 }
 
 .review {
