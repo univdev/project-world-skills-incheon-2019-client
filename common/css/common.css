@@ -19,6 +19,7 @@ a {
 }
 
 .container { padding: 0 80px; max-width: 1440px; width: 100%; margin: auto; }
+
 .grid-row { display: flex; flex-wrap: wrap; margin: 0 -16px; }
 .col-lg-1 { width: calc(8.333% * 1); padding: 0 16px; }
 .col-lg-2 { width: calc(8.333% * 2); padding: 0 16px; }
