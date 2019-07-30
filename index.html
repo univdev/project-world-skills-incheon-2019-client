@@ -12,6 +12,18 @@
     <meta property="og:image" content="images/01.jpg">
 </head>
 <body>
+    <input type="checkbox" id="mobileMenuToggle" hidden>
+    <ul id="mobileMenu">
+        <li>
+            <a href="rental.html">행사장 임대</a>
+        </li>
+        <li>
+            <a href="transportation.html">교통편 예약</a>
+        </li>
+        <li>
+            <a href="admin_venue.html">관리자</a>
+        </li>
+    </ul>
     <div id="wrap">
         <div class="header">
             <div class="header__upper">
@@ -21,6 +33,11 @@
                             <img src="/assets/logo.png" alt="벡스코" title="벡스코">
                         </a>
                     </div>
+                    <label class="mobile-menu" for="mobileMenuToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
                 </div>
             </div>
             <div class="header__downer">
@@ -28,7 +45,7 @@
                     <ul class="menu">
                         <li><a href="rental.html">행사장 임대</a></li>
                         <li><a href="transportation.html">교통편 예약</a></li>
-                        <li><a href="admin_rental.html">관리자</a></li>
+                        <li><a href="admin_venue.html">관리자</a></li>
                     </ul>
                 </div>
             </div>
@@ -408,7 +425,6 @@
                 draw(placement) {
                     this.target.find('.tooltip__image').css('background-image', `url(/images/${placement.image})`);
                     this.target.find('.tooltip__title').text(placement.name);
-                    this.target.find('.tooltip')
                 },
             };
 
