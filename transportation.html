@@ -7,6 +7,7 @@
     <title>Bexco - 교통편 임대</title>
     <link rel="stylesheet" href="common/css/common.css">
     <link rel="stylesheet" href="common/css/transportation.css">
+    <link rel="stylesheet" href="common/css/jquery-ui.css">
     <meta property="og:title" content="Bexco - 교통편 임대">
     <meta property="og:description" content="Bexco 교통편을 임대할 수 있는 페이지입니다.">
     <meta property="og:image" content="images/01.jpg">
@@ -76,6 +77,10 @@
                                     <div class="transportation__row-title">운행 시간대</div>
                                     <div class="transportation__content transportation__time">qwe</div>
                                 </div>
+                                <div class="transportation__detail-row">
+                                    <div class="transportation__row-title">휴무일</div>
+                                    <div class="transportation__content transportation__rest">qwe</div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -105,9 +110,56 @@
             </div>
         </div>
     </div>
+    <div class="reservation-dialog">
+        <form action="#" id="reservationForm">
+            <div class="reservation__row">
+                <div class="reservation__title">탑승 일자</div>
+                <div class="reservation__inline-row">
+                    <div class="reservation__col">
+                        <div class="reservation__datepicker"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="reservation__row">
+                <div class="reservation__title">탑승객 유형</div>
+                <div class="reservation__inline-row">
+                    <div class="reservation__col">
+                        <div class="reservation__col-title">어른</div>
+                        <div class="reservation__col-content">
+                            <input type="text" id="adultCount" name="adult" class="number-spinner" value="0" data-type="adult">
+                        </div>
+                    </div>
+                    <div class="reservation__col">
+                        <div class="reservation__col-title">어린이</div>
+                        <div class="reservation__col-content">
+                            <input type="text" id="kidCount" name="kid" class="number-spinner" value="0" data-type="kid">
+                        </div>
+                    </div>
+                    <div class="reservation__col">
+                        <div class="reservation__col-title">노약자</div>
+                        <div class="reservation__col-content">
+                            <input type="text" id="grandCount" name="grand" class="number-spinner" value="0" data-type="grand">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reservation__row">
+                <h3>총 합 가격: <span class="reservation__price">0원</span></h3>
+            </div>
+            <div class="reservation__row">
+                <div class="reservation__col">
+                    <button type="submit" class="reservation__submit">예약하기</button>
+                </div>
+            </div>
+        </form>
+    </div>
     <script
     src="https://code.jquery.com/jquery-3.4.1.js"
     integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+    <script
+    src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
+    integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30="
     crossorigin="anonymous"></script>
     <script>
         (() => {
@@ -115,21 +167,44 @@
                 $(document).on(event, target, callback);
             }
 
-            var reservations = [];
-            var transportationReservations = [];
-            var transportations = [];
+            var currentTransportation = {};
+            var currentTransportationReservations = [];
+
+            var TransporationReservationDataManager = {
+                data: [],
+                get(index) {
+                    return (this.data || []).filter(item => item.id === index)[0];
+                },
+                getByTransportation(id) {
+                    return (this.data || []).filter(item => item.transportation === id);
+                },
+            };
+
+            var TransportationDataManager = {
+                data: [],
+                get(index) {
+                    return (this.data || []).filter(item => item.id === index)[0];
+                },
+            };
+
+            var ReservationDataManager = {
+                data: [],
+                get(index) {
+                    return (this.data || []).filter(item => item.id === index)[0];
+                },
+            };
 
             $.get('/data/reservation.json').then((data) => {
-                reservations = data.reservations;
+                ReservationDataManager.data = data.reservations;
             });
 
             $.get('/data/transportation_reservation.json').then((data) => {
-                transportationReservations = data.transportation_reservations;
+                TransporationReservationDataManager.data = data.transportation_reservations;
             });
 
             $.get('/data/transportation.json').then((data) => {
-                transportations = data.transportations;
-                TransportationTableManager.draw(transportations);
+                TransportationDataManager.data = data.transportations;
+                TransportationTableManager.draw(TransportationDataManager.data);
             });
 
             var TransportationTableManager = {
@@ -137,14 +212,16 @@
                 row: $($('.transportation tbody tr').get(0)),
                 draw(transporations) {
                     this.clear();
-                    for (var i = 0; i < transportations.length; i += 1) {
+                    for (var i = 0; i < transporations.length; i += 1) {
                         var transportation = transporations[i];
                         var clone = this.row.clone();
+                        clone.attr('data-idx', transportation.id);
                         clone.find('.transportation__name').text(transportation.name);
                         clone.find('.transportation__description').text(transportation.description);
                         clone.find('.transportation__price').text(`${transportation.price}원`);
                         clone.find('.transportation__cycle').text(`${transportation.interval}분`);
                         clone.find('.transportation__time').text(`${transportation.cycle[0]} ~ ${transportation.cycle[1]}`);
+                        clone.find('.transportation__rest').text(RestFilter.getAll(transportation.rest).join(', '));
                         this.table.find('tbody').append(clone);
                     }
                 },
@@ -153,6 +230,141 @@
                 },
             };
 
+            var RestFilter = {
+                data: ['일', '월', '화', '수', '목', '금', '토'],
+                get(index) {
+                    return this.data[index] || null;
+                },
+                getAll(arr) {
+                    var result = [];
+                    for (var i = 0; i < arr.length; i += 1) {
+                        result.push(RestFilter.get(arr[i]));
+                    }
+                    return result;
+                },
+            };
+
+            var ReservationDialogManager = {
+                target: $('.reservation-dialog'),
+                init() {
+                    this.target.dialog({
+                        modal: true,
+                        title: '예약',
+                        width: 550,
+                        height: 550,
+                        open() {
+                            $('input').blur();
+                        },
+                        close() {
+                            ReservationDialogManager.clear();
+                        },
+                    });
+                    this.target.dialog('close');
+                },
+                show(flag) {
+                    flag ? this.target.dialog('open') : this.target.dialog('close');
+                },
+                setPrice(price) {
+                    this.target.find('.reservation__price').text(`${price}원`);
+                },
+                clear() {
+                    $('#reservationForm')[0].reset();
+                    this.target.find('.reservation__price').text('0원');
+                },
+            };
+
+            var PriceManager = {
+                get(price, data) {
+                    var result = (price * data.adult) + (price * 0.6 & data.kid);
+                    var grandPercent = (price <= 100000 && price > 20000) ? 0.5 : (price > 100000) ? 0.8 : 0;
+                    result += (price * grandPercent * data.grand);
+
+                    return result;
+                },
+            };
+
+            var ReservationManager = {
+                submit(formData) {
+                    var adultCount = formData.get('adult');
+                    var kidCount = formData.get('kid');
+                    var grandCount = formData.get('grand');
+                    var message = '';
+
+                    if (adultCount <= 0 && kidCount <= 0 && grandCount <= 0) {
+                        message += '최소한 한 명 이상 탑승해야 합니다.';
+                    }
+
+                    if (message) {
+                        alert(message);
+                        return;
+                    }
+                },
+            };
+
+            var SpinnerManager = {
+                init() {
+                    $('#adultCount, #kidCount, #grandCount').spinner({
+                        min: 0,
+                        value: 0,
+                        stop() {
+                            var obj = {
+                                adult: $('#adultCount').val(),
+                                kid: $('#kidCount').val(),
+                                grand: $('#grandCount').val(),
+                            };
+                            var price = PriceManager.get(currentTransportation.price, obj);
+                            ReservationDialogManager.setPrice(price);
+                        },
+                    });
+                },
+            };
+
+            var DatepickerManager = {
+                target: $('.reservation__datepicker'),
+                init() {
+                    this.target.datepicker({
+                        minDate: new Date(),
+                    });
+                },
+                setDisabledDate(data) {
+                    this.target.datepicker('option', 'beforeShowDay', (date) => {
+                        var rest = data.rest || [];
+                        var reservations = data.reservations;
+                        var currentDay = date.getDay();
+                        var flag = true;
+                        var zeroDate = DateManager.setZeroTime(date);
+
+                        if (rest.indexOf(currentDay) > -1) flag = false;
+                        return [flag];
+                    });
+                },
+            };
+
+            var DateManager = {
+                setZeroTime(date) {
+                    return date.setHours(0, 0, 0, 0);
+                },
+            };
+
+            DatepickerManager.init();
+            SpinnerManager.init();
+            ReservationDialogManager.init();
+
+            on('click', '.transportation tbody tr', (e) => {
+                var target = $(e.currentTarget);
+                var transportationId = target.data('idx');
+                var transportation = TransportationDataManager.get(transportationId);
+                ReservationDialogManager.show(true);
+                currentTransportation = transportation;
+                currentTransportationReservations = TransporationReservationDataManager.getByTransportation(currentTransportation.id);
+                DatepickerManager.setDisabledDate({ rest: currentTransportation.rest });
+            });
+
+            on('submit', '#reservationForm', (e) => {
+                e.preventDefault();
+                var formData = new FormData(e.currentTarget);
+                ReservationManager.submit(formData);
+            });
         })();
     </script>
 </body>
