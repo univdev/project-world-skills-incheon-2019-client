@@ -44,12 +44,41 @@
                 <table class="transportation">
                     <thead>
                         <tr>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
+                            <th style="width: 200px">교통편 이름</th>
+                            <th>교통편 정보</th>
+                            <th style="width: 250px">교통편 운행 정보</th>
                         </tr>
                     </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="transportation__name">교통편 이름</div>
+                            </td>
+                            <td class="transportation__detail">
+                                <div class="transportation__detail-row">
+                                    <div class="transportation__row-title">교통편 설명</div>
+                                    <div class="transportation__content transportation__description">qwe</div>
+                                </div>
+                                <div class="transportation__detail-row">
+                                    <div class="transportation__row-title">운임료</div>
+                                    <div class="transportation__content transportation__price">qwe</div>
+                                </div>
+                                <div class="transportation__notice">
+                                    위 요금은 성인 기준이며, 어린이는 40%의 요금 할인, 경로자는 무료입니다.
+                                </div>
+                            </td>
+                            <td class="transportation__detail">
+                                <div class="transportation__detail-row">
+                                    <div class="transportation__row-title">운행 주기</div>
+                                    <div class="transportation__content transportation__cycle">qwe</div>
+                                </div>
+                                <div class="transportation__detail-row">
+                                    <div class="transportation__row-title">운행 시간대</div>
+                                    <div class="transportation__content transportation__time">qwe</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -76,6 +105,10 @@
             </div>
         </div>
     </div>
+    <script
+    src="https://code.jquery.com/jquery-3.4.1.js"
+    integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
     <script>
         (() => {
             function on(event, target, callback) {
@@ -84,19 +117,41 @@
 
             var reservations = [];
             var transportationReservations = [];
-            var transportation = [];
+            var transportations = [];
 
             $.get('/data/reservation.json').then((data) => {
                 reservations = data.reservations;
             });
 
-            $.get('/data/transportation_reservations.json').then((data) => {
-                transportationReservations = data.transportation_reservation;
+            $.get('/data/transportation_reservation.json').then((data) => {
+                transportationReservations = data.transportation_reservations;
             });
 
             $.get('/data/transportation.json').then((data) => {
-                transportation = data.transportation;
+                transportations = data.transportations;
+                TransportationTableManager.draw(transportations);
             });
+
+            var TransportationTableManager = {
+                table: $('.transportation'),
+                row: $($('.transportation tbody tr').get(0)),
+                draw(transporations) {
+                    this.clear();
+                    for (var i = 0; i < transportations.length; i += 1) {
+                        var transportation = transporations[i];
+                        var clone = this.row.clone();
+                        clone.find('.transportation__name').text(transportation.name);
+                        clone.find('.transportation__description').text(transportation.description);
+                        clone.find('.transportation__price').text(`${transportation.price}원`);
+                        clone.find('.transportation__cycle').text(`${transportation.interval}분`);
+                        clone.find('.transportation__time').text(`${transportation.cycle[0]} ~ ${transportation.cycle[1]}`);
+                        this.table.find('tbody').append(clone);
+                    }
+                },
+                clear() {
+                    this.table.find('tbody').html('');
+                },
+            };
 
         })();
     </script>

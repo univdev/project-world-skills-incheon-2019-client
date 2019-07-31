@@ -41,6 +41,35 @@
     padding: 32px 0;
 }
 
+.transportation {
+    border-collapse: collapse;
+    width: 100%;
+}
+.transportation td,
+.transportation th {
+    border: 1px solid #CCC;
+    padding: 6px;
+}
+.transportation tbody tr {
+    cursor: pointer;
+}
+.transportation tbody tr:hover {
+    background-color: #EEE;
+}
+.transportation .transportation__detail-row {
+    margin-bottom: 8px;
+}
+.transportation .transportation__detail-row:last-of-type {
+    margin-bottom: 0;
+}
+.transportation .transportation__detail-row .transportation__row-title {
+    font-weight: bold;
+}
+.transportation .transportation__notice {
+    font-size: 12px;
+    color: #a1a1a1;
+}
+
 
 .footer {
     width: 100%;
