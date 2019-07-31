@@ -138,7 +138,7 @@
                     <div class="reservation__col">
                         <div class="reservation__col-title">노약자</div>
                         <div class="reservation__col-content">
-                            <input type="text" id="grandCount" name="grand" class="number-spinner" value="0" data-type="grand">
+                            <input type="text" id="oldCount" name="old" class="number-spinner" value="0" data-type="old">
                         </div>
                     </div>
                 </div>
@@ -178,6 +178,16 @@
                 getByTransportation(id) {
                     return (this.data || []).filter(item => item.transportation === id);
                 },
+                getPeopleCountByDay(date) {
+                    var dateFormat = DateManager.format(date);
+                    var arr =  (this.data || []).filter(item => item.date === dateFormat);
+                    var result = 0;
+                    for (var i = 0; i < arr.length; i += 1) {
+                        var member = arr[i].member || {};
+                        result += member.old + member.kid + member.adult;
+                    }
+                    return result;
+                },
             };
 
             var TransportationDataManager = {
@@ -191,6 +201,13 @@
                 data: [],
                 get(index) {
                     return (this.data || []).filter(item => item.id === index)[0];
+                },
+                getDates() {
+                    var result = [];
+                    for (var i = 0; i < this.data.length; i += 1) {
+                        result.push([this.data[i].since, this.data[i].until]);
+                    }
+                    return result;
                 },
             };
 
@@ -276,8 +293,8 @@
             var PriceManager = {
                 get(price, data) {
                     var result = (price * data.adult) + (price * 0.6 & data.kid);
-                    var grandPercent = (price <= 100000 && price > 20000) ? 0.5 : (price > 100000) ? 0.8 : 0;
-                    result += (price * grandPercent * data.grand);
+                    var oldPercent = (price <= 100000 && price > 20000) ? 0.5 : (price > 100000) ? 0.8 : 0;
+                    result += (price * oldPercent * data.old);
 
                     return result;
                 },
@@ -287,10 +304,10 @@
                 submit(formData) {
                     var adultCount = formData.get('adult');
                     var kidCount = formData.get('kid');
-                    var grandCount = formData.get('grand');
+                    var oldCount = formData.get('old');
                     var message = '';
 
-                    if (adultCount <= 0 && kidCount <= 0 && grandCount <= 0) {
+                    if (adultCount <= 0 && kidCount <= 0 && oldCount <= 0) {
                         message += '최소한 한 명 이상 탑승해야 합니다.';
                     }
 
@@ -303,14 +320,14 @@
 
             var SpinnerManager = {
                 init() {
-                    $('#adultCount, #kidCount, #grandCount').spinner({
+                    $('#adultCount, #kidCount, #oldCount').spinner({
                         min: 0,
                         value: 0,
                         stop() {
                             var obj = {
                                 adult: $('#adultCount').val(),
                                 kid: $('#kidCount').val(),
-                                grand: $('#grandCount').val(),
+                                old: $('#oldCount').val(),
                             };
                             var price = PriceManager.get(currentTransportation.price, obj);
                             ReservationDialogManager.setPrice(price);
@@ -331,10 +348,25 @@
                         var rest = data.rest || [];
                         var reservations = data.reservations;
                         var currentDay = date.getDay();
-                        var flag = true;
+                        var flag = false;
                         var zeroDate = DateManager.setZeroTime(date);
 
-                        if (rest.indexOf(currentDay) > -1) flag = false;
+                        for (var i = 0; i < reservations.length; i += 1) {
+                            var reservation = reservations[i];
+                            var since = reservation[0] || null;
+                            var until = reservation[1] || null;
+
+                            if (since && until) {
+                                since = DateManager.setZeroTime(since);
+                                until = DateManager.setZeroTime(until);
+                                if (zeroDate >= new Date(since) && zeroDate <= new Date(until)) {
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (rest.indexOf(currentDay) > -1 || !flag) flag = false;
                         return [flag];
                     });
                 },
@@ -342,7 +374,12 @@
 
             var DateManager = {
                 setZeroTime(date) {
-                    return date.setHours(0, 0, 0, 0);
+                    date = new Date(date);
+                    date.setHours(0, 0, 0, 0);
+                    return date;
+                },
+                format(date) {
+                    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
                 },
             };
 
@@ -357,7 +394,12 @@
                 ReservationDialogManager.show(true);
                 currentTransportation = transportation;
                 currentTransportationReservations = TransporationReservationDataManager.getByTransportation(currentTransportation.id);
-                DatepickerManager.setDisabledDate({ rest: currentTransportation.rest });
+
+                var beforeShowDayOptions = {
+                    rest: currentTransportation.rest,
+                    reservations: ReservationDataManager.getDates(),
+                };
+                DatepickerManager.setDisabledDate(beforeShowDayOptions);
             });
 
             on('submit', '#reservationForm', (e) => {
