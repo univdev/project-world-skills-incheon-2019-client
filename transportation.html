@@ -118,6 +118,9 @@
                     <div class="reservation__col">
                         <div class="reservation__datepicker"></div>
                     </div>
+                    <div class="reservation__col">
+                        <select name="time" class="reservation__time-combobox" disabled></select>
+                    </div>
                 </div>
             </div>
             <div class="reservation__row">
@@ -180,11 +183,22 @@
                 },
                 getPeopleCountByDay(date) {
                     var dateFormat = DateManager.format(date);
-                    var arr =  (this.data || []).filter(item => item.date === dateFormat);
+                    var arr = (this.data || []).filter(item => item.date === dateFormat);
                     var result = 0;
                     for (var i = 0; i < arr.length; i += 1) {
                         var member = arr[i].member || {};
                         result += member.old + member.kid + member.adult;
+                    }
+                    return result;
+                },
+                getCountByDateWithTime(transporationId, date, time) {
+                    var transportations = this.getByTransportation(transporationId);
+                    var arr = transportations.filter(item => item.date === DateManager.format(date) && item.time === time);
+                    var result = 0;
+                    for (var i = 0; i < arr.length; i += 1) {
+                        var item = arr[i];
+                        var member = item.member;
+                        result += member.old + member.adult + member.kid;
                     }
                     return result;
                 },
@@ -194,6 +208,21 @@
                 data: [],
                 get(index) {
                     return (this.data || []).filter(item => item.id === index)[0];
+                },
+                getTimeList(transportation) {
+                    var result = [];
+                    var cycle = transportation.cycle;
+                    var cycleStart = DateManager.getOnlyTime(cycle[0]).getTime();
+                    var cycleEnd = DateManager.getOnlyTime(cycle[1]).getTime();
+                    var interval = transportation.interval;
+                    var current = cycleStart;
+
+                    while (current <= cycleEnd) {
+                        result.push(new Date(current));
+                        current += interval * 1000 * 60;
+                    }
+
+                    return result;
                 },
             };
 
@@ -341,6 +370,18 @@
                 init() {
                     this.target.datepicker({
                         minDate: new Date(),
+                        onSelect(date) {
+                            var timeList = TransportationDataManager.getTimeList(currentTransportation);
+                            var timeListFormat = [];
+                            for (var i = 0; i < timeList.length; i += 1) {
+                                var format = DateManager.timeFormat(timeList[i]);
+                                var countPeople = TransporationReservationDataManager.getCountByDateWithTime(currentTransportation.id, new Date(date), format);
+                                var disabled = countPeople >= currentTransportation.limit;
+                                // TODO: 이거 disabled 제한 걸 것.
+                                timeListFormat.push({ time: format, disabled });
+                            }
+                            TimeComboboxManager.addItems(timeListFormat);
+                        },
                     });
                 },
                 setDisabledDate(data) {
@@ -380,6 +421,51 @@
                 },
                 format(date) {
                     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                },
+                getOnlyTime(time) {
+                    var standard = this.getStandardDate();
+                    var timePart = time.split(':');
+                    var hours = timePart[0] || 0;
+                    var minutes = timePart[1] || 0;
+                    var seconds = timePart[2] || 0;
+                    standard.setHours(hours, minutes, seconds);
+                    return standard;
+                },
+                getStandardDate() {
+                    return new Date('1970-01-01 00:00:00');
+                },
+                addMinutes(date, minutes) {
+                    return new Date(new Date(date) + (minutes * 1000 * 60));
+                },
+                timeFormat(date) {
+                    var hours = `${date.getHours()}`.padStart(2, '0');
+                    var minutes = `${date.getMinutes()}`.padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                },
+            };
+
+            var TimeComboboxManager = {
+                target: $('.reservation__time-combobox'),
+                addItems(items) {
+                    this.clear();
+                    for (var i = 0; i < items.length; i += 1) {
+                        var item = items[i];
+                        var time = item.time;
+                        var disabled = item.disabled;
+                        var option = document.createElement('option');
+                        option.setAttribute('value', time);
+                        option.setAttribute('label', time);
+                        if (disabled) option.setAttribute('disabled', true);
+                        this.target.append(option);
+                        if (this.target.find('option').length > 0) this.activate(true);
+                    }
+                },
+                clear() {
+                    this.target.find('option').remove();
+                    if (this.target.find('option').length <= 0) this.activate(false);
+                },
+                activate(flag) {
+                    this.target.prop('disabled', !flag);
                 },
             };
 
