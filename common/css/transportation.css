@@ -73,6 +73,9 @@
 .reservation-dialog .reservation__row {
     margin-bottom: 8px;
 }
+.reservation-dialog .reservation__date-row {
+    align-items: flex-start;
+}
 .reservation-dialog .reservation__title {
     font-weight: bold;
     font-size: 18px;

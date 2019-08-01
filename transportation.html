@@ -112,7 +112,7 @@
     </div>
     <div class="reservation-dialog">
         <form action="#" id="reservationForm">
-            <div class="reservation__row">
+            <div class="reservation__row reservation__date-row">
                 <div class="reservation__title">탑승 일자</div>
                 <div class="reservation__inline-row">
                     <div class="reservation__col">
@@ -192,13 +192,13 @@
                     return result;
                 },
                 getCountByDateWithTime(transporationId, date, time) {
-                    var transportations = this.getByTransportation(transporationId);
-                    var arr = transportations.filter(item => item.date === DateManager.format(date) && item.time === time);
+                    var reservations = this.getByTransportation(transporationId);
+                    var arr = reservations.filter(item => item.date === DateManager.format(date) && item.time === time);
                     var result = 0;
                     for (var i = 0; i < arr.length; i += 1) {
                         var item = arr[i];
-                        var member = item.member;
-                        result += member.old + member.adult + member.kid;
+                        var member = item.member || {};
+                        result += (member.old || 0) + (member.adult || 0) + (member.kid || 0);
                     }
                     return result;
                 },
@@ -321,7 +321,7 @@
 
             var PriceManager = {
                 get(price, data) {
-                    var result = (price * data.adult) + (price * 0.6 & data.kid);
+                    var result = (price * data.adult) + (price * 0.6 * data.kid);
                     var oldPercent = (price <= 100000 && price > 20000) ? 0.5 : (price > 100000) ? 0.8 : 0;
                     result += (price * oldPercent * data.old);
 
@@ -330,15 +330,16 @@
             };
 
             var ReservationManager = {
+                ableCount: 0,
                 submit(formData) {
-                    var adultCount = formData.get('adult');
-                    var kidCount = formData.get('kid');
-                    var oldCount = formData.get('old');
+                    var adultCount = formData.get('adult') * 1;
+                    var kidCount = formData.get('kid') * 1;
+                    var oldCount = formData.get('old') * 1;
+                    var sumCount = adultCount + kidCount + oldCount;
                     var message = '';
 
-                    if (adultCount <= 0 && kidCount <= 0 && oldCount <= 0) {
-                        message += '최소한 한 명 이상 탑승해야 합니다.';
-                    }
+                    if (sumCount <= 0) message += '최소한 한 명 이상 탑승해야 합니다.';
+                    if (sumCount > this.ableCount) message += '남은 인원 수보다 더 많은 인원은 예약이 불가능합니다!';
 
                     if (message) {
                         alert(message);
@@ -367,12 +368,14 @@
 
             var DatepickerManager = {
                 target: $('.reservation__datepicker'),
+                selected: null,
                 init() {
                     this.target.datepicker({
                         minDate: new Date(),
                         onSelect(date) {
                             var timeList = TransportationDataManager.getTimeList(currentTransportation);
                             var timeListFormat = [];
+                            DatepickerManager.selected = new Date(date);
                             for (var i = 0; i < timeList.length; i += 1) {
                                 var format = DateManager.timeFormat(timeList[i]);
                                 var countPeople = TransporationReservationDataManager.getCountByDateWithTime(currentTransportation.id, new Date(date), format);
@@ -419,8 +422,13 @@
                     date.setHours(0, 0, 0, 0);
                     return date;
                 },
+                pad(number) {
+                    return `${number}`.padStart(2, '0');
+                },
                 format(date) {
-                    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                    var month = this.pad(date.getMonth() + 1);
+                    var days = this.pad(date.getDate());
+                    return `${date.getFullYear()}-${month}-${days}`;
                 },
                 getOnlyTime(time) {
                     var standard = this.getStandardDate();
@@ -486,12 +494,22 @@
                     reservations: ReservationDataManager.getDates(),
                 };
                 DatepickerManager.setDisabledDate(beforeShowDayOptions);
+                TimeComboboxManager.clear();
             });
 
             on('submit', '#reservationForm', (e) => {
                 e.preventDefault();
                 var formData = new FormData(e.currentTarget);
                 ReservationManager.submit(formData);
+            });
+
+            on('change', '.reservation__time-combobox', (e) => {
+                var target = $(e.currentTarget);
+                var selectedTime = target.val();
+                var selectedDate = DatepickerManager.selected;
+                var countPeople = TransporationReservationDataManager.getCountByDateWithTime(currentTransportation.id, selectedDate, selectedTime);
+                var ableCount = currentTransportation.limit - countPeople; // 예약 가능한 사람 수
+                ReservationManager.ableCount = ableCount;
             });
         })();
     </script>
