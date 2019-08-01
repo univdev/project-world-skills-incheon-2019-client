@@ -101,6 +101,11 @@
     background-color: #f5f5f5;
     padding: 20px 0;
 }
+.header .header__downer .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 .header .header__downer .menu {
     display: flex;
     align-items: center;
